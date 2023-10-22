@@ -1,0 +1,14 @@
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\bin\Release\WebcamOverlay.exe.config
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\bin\Release\WebcamOverlay.exe
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\bin\Release\WebcamOverlay.pdb
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\bin\Release\Microsoft.Win32.Registry.dll
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\bin\Release\Newtonsoft.Json.xml
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\obj\Release\WebcamOverlay.csproj.AssemblyReference.cache
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\obj\Release\WebcamOverlay.csproj.SuggestedBindingRedirects.cache
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\obj\Release\WebcamOverlay.Form1.resources
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\obj\Release\WebcamOverlay.Properties.Resources.resources
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\obj\Release\WebcamOverlay.csproj.GenerateResource.cache
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\obj\Release\WebcamOverlay.csproj.CoreCompileInputs.cache
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\obj\Release\WebcamOverlay.csproj.CopyComplete
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\obj\Release\WebcamOverlay.exe
+C:\Users\micha\Documents\github\MotionOverlayOfficial\Src\WebcamOverlayFeatured\WebcamOverlay\obj\Release\WebcamOverlay.pdb

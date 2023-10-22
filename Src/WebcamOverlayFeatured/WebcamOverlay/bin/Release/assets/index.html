@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: none;
+            background-size: 100vw 100vh;
+        }
+
+        img {
+            display: block;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            left: 0vw;
+            top: 0vh;
+            border-radius: 10vw 10vw 10vw 10vw;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <img src=''/>
+    <script>
+
+        function setBackground(base64image) {
+            var img = document.getElementsByTagName('img')[0];
+            img.src = 'data:image/jpg;base64, ' + base64image;
+        }
+    </script>
+
+</body>
+</html>

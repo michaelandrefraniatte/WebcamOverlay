@@ -1,0 +1,11 @@
+C:\Users\mic\Documents\GitHub\WebcamOverlay\Src\WebcamOverlay\WebcamOverlay\bin\Release\WebcamOverlay.exe.config
+C:\Users\mic\Documents\GitHub\WebcamOverlay\Src\WebcamOverlay\WebcamOverlay\bin\Release\WebcamOverlay.exe
+C:\Users\mic\Documents\GitHub\WebcamOverlay\Src\WebcamOverlay\WebcamOverlay\bin\Release\WebcamOverlay.pdb
+C:\Users\mic\Documents\GitHub\WebcamOverlay\Src\WebcamOverlay\WebcamOverlay\obj\Release\WebcamOverlay.csprojAssemblyReference.cache
+C:\Users\mic\Documents\GitHub\WebcamOverlay\Src\WebcamOverlay\WebcamOverlay\obj\Release\WebcamOverlay.Form1.resources
+C:\Users\mic\Documents\GitHub\WebcamOverlay\Src\WebcamOverlay\WebcamOverlay\obj\Release\WebcamOverlay.Properties.Resources.resources
+C:\Users\mic\Documents\GitHub\WebcamOverlay\Src\WebcamOverlay\WebcamOverlay\obj\Release\WebcamOverlay.csproj.GenerateResource.cache
+C:\Users\mic\Documents\GitHub\WebcamOverlay\Src\WebcamOverlay\WebcamOverlay\obj\Release\WebcamOverlay.csproj.CoreCompileInputs.cache
+C:\Users\mic\Documents\GitHub\WebcamOverlay\Src\WebcamOverlay\WebcamOverlay\obj\Release\WebcamOverlay.csproj.CopyComplete
+C:\Users\mic\Documents\GitHub\WebcamOverlay\Src\WebcamOverlay\WebcamOverlay\obj\Release\WebcamOverlay.exe
+C:\Users\mic\Documents\GitHub\WebcamOverlay\Src\WebcamOverlay\WebcamOverlay\obj\Release\WebcamOverlay.pdb
