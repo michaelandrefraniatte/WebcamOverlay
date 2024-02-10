@@ -46,7 +46,6 @@ C:\Users\micha\Documents\GitHub\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOver
 C:\Users\micha\Documents\GitHub\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\bin\x64\Release\WebcamOverlay.exe
 C:\Users\micha\Documents\GitHub\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\bin\x64\Release\WebcamOverlay.pdb
 C:\Users\micha\Documents\GitHub\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\obj\x64\Release\WebcamOverlay.csproj.AssemblyReference.cache
-C:\Users\micha\Documents\GitHub\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\obj\x64\Release\WebcamOverlay.csproj.SuggestedBindingRedirects.cache
 C:\Users\micha\Documents\GitHub\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\obj\x64\Release\WebcamOverlay.Form1.resources
 C:\Users\micha\Documents\GitHub\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\obj\x64\Release\WebcamOverlay.Properties.Resources.resources
 C:\Users\micha\Documents\GitHub\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\obj\x64\Release\WebcamOverlay.csproj.GenerateResource.cache

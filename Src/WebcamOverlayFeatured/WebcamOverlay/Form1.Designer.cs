@@ -66,6 +66,7 @@ namespace WebcamOverlay
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Shown += new System.EventHandler(this.Form1_Shown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.Leave += new System.EventHandler(this.Form1_Deactivate);
             this.ResumeLayout(false);
 
