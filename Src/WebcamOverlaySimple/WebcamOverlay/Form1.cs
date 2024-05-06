@@ -4,6 +4,19 @@ using System.Windows.Forms;
 using AForge.Video;
 using AForge.Video.DirectShow;
 using System.Runtime.InteropServices;
+using System.Drawing.Imaging;
+using SharpDX;
+using SharpDX.Direct2D1;
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
+using AlphaMode = SharpDX.Direct2D1.AlphaMode;
+using Device = SharpDX.Direct3D11.Device;
+using MapFlags = SharpDX.Direct3D11.MapFlags;
+using Rectangle = System.Drawing.Rectangle;
+using Bitmap = System.Drawing.Bitmap;
+using System.Drawing.Drawing2D;
+using Point = System.Drawing.Point;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace WebcamOverlay
 {
@@ -22,34 +35,17 @@ namespace WebcamOverlay
         [DllImport("ntdll.dll", EntryPoint = "NtSetTimerResolution")]
         public static extern void NtSetTimerResolution(uint DesiredResolution, bool SetResolution, ref uint CurrentResolution);
         public static uint CurrentResolution = 0;
-        public static Image img;
+        public static Bitmap img;
         private FilterInfoCollection CaptureDevice;
         private VideoCaptureDevice FinalFrame;
         private VideoCapabilities[] videoCapabilities;
         private static int height = 300, width, imgheight, imgwidth;
         private static bool getstate = false;
         private static double ratio, border;
-        private static int[] wd = { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 };
-        private static int[] wu = { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 };
-        private static void valchanged(int n, bool val)
-        {
-            if (val)
-            {
-                if (wd[n] <= 1)
-                {
-                    wd[n] = wd[n] + 1;
-                }
-                wu[n] = 0;
-            }
-            else
-            {
-                if (wu[n] <= 1)
-                {
-                    wu[n] = wu[n] + 1;
-                }
-                wd[n] = 0;
-            }
-        }
+        private static WindowRenderTarget target;
+        private static SharpDX.Direct2D1.Factory1 fact = new SharpDX.Direct2D1.Factory1();
+        private static RenderTargetProperties renderProp;
+        private static HwndRenderTargetProperties winProp;
 
         [Obsolete]
         private void Form1_Shown(object sender, EventArgs e)
@@ -59,7 +55,7 @@ namespace WebcamOverlay
                 TimeBeginPeriod(1);
                 NtSetTimerResolution(1, true, ref CurrentResolution);
                 AppDomain.CurrentDomain.UnhandledException += new System.UnhandledExceptionEventHandler(AppDomain_UnhandledException);
-                Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
+                System.Windows.Forms.Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
                 this.TopMost = true;
                 CaptureDevice = new FilterInfoCollection(FilterCategory.VideoInputDevice);
                 FinalFrame = new VideoCaptureDevice(CaptureDevice[0].MonikerString);
@@ -71,11 +67,8 @@ namespace WebcamOverlay
                 width = (int)(height * ratio);
                 this.Size = new Size(width, height);
                 this.ClientSize = new Size(width, height);
-                this.Location = new Point(Screen.PrimaryScreen.Bounds.Width - width - 10, 10);
+                this.Location = new System.Drawing.Point(Screen.PrimaryScreen.Bounds.Width - width - 10, 10);
                 border = 1.00f;
-                this.pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-                this.pictureBox1.Size = new Size((int)(height * border * ratio), (int)(height * border));
-                this.pictureBox1.Location = new Point((width / 2) - (this.pictureBox1.Width / 2), (height / 2) - (this.pictureBox1.Height / 2));
                 FinalFrame.DesiredFrameSize = new Size((int)(height * border * ratio), (int)(height * border));
                 FinalFrame.SetCameraProperty(CameraControlProperty.Zoom, 600, CameraControlFlags.Manual);
                 FinalFrame.SetCameraProperty(CameraControlProperty.Focus, 0, CameraControlFlags.Manual);
@@ -89,6 +82,7 @@ namespace WebcamOverlay
                 System.Threading.Thread.Sleep(1000);
                 imgheight = img.Height;
                 imgwidth = img.Width;
+                InitDisplayCapture(this.Handle);
             }
             catch
             {
@@ -107,14 +101,6 @@ namespace WebcamOverlay
                 const string caption = "About";
                 MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-        }
-        public void SetWebcamInputs(Bitmap EditableImg)
-        {
-            try
-            {
-                pictureBox1.Image = EditableImg;
-            }
-            catch { }
         }
         public void AppDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
         {
@@ -137,121 +123,41 @@ namespace WebcamOverlay
         void FinalFrame_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
             img = (Bitmap)eventArgs.Frame.Clone();
-            try
-            {
-                valchanged(1, GetAsyncKeyState(Keys.NumPad9));
-                if (wd[1] == 1)
-                {
-                    this.pictureBox1.Size = new Size((int)(height * border * ratio), (int)(height * border));
-                    this.pictureBox1.Location = new Point((width / 2) - (this.pictureBox1.Width / 2), (height / 2) - (this.pictureBox1.Height / 2));
-                    this.Size = new Size(width, height);
-                    this.ClientSize = new Size(width, height);
-                    this.Location = new Point(Screen.PrimaryScreen.Bounds.Width - width - 10, 10);
-                }
-                valchanged(2, GetAsyncKeyState(Keys.NumPad8));
-                if (wd[2] == 1)
-                {
-                    this.pictureBox1.Size = new Size((int)(height * border * ratio), (int)(height * border));
-                    this.pictureBox1.Location = new Point((width / 2) - (this.pictureBox1.Width / 2), (height / 2) - (this.pictureBox1.Height / 2));
-                    this.Size = new Size(width, height);
-                    this.ClientSize = new Size(width, height);
-                    this.Location = new Point(Screen.PrimaryScreen.Bounds.Width / 2 - width / 2, 10);
-                }
-                valchanged(3, GetAsyncKeyState(Keys.NumPad7));
-                if (wd[3] == 1)
-                {
-                    this.pictureBox1.Size = new Size((int)(height * border * ratio), (int)(height * border));
-                    this.pictureBox1.Location = new Point((width / 2) - (this.pictureBox1.Width / 2), (height / 2) - (this.pictureBox1.Height / 2));
-                    this.Size = new Size(width, height);
-                    this.ClientSize = new Size(width, height);
-                    this.Location = new Point(10, 10);
-                }
-                valchanged(4, GetAsyncKeyState(Keys.NumPad4));
-                if (wd[4] == 1)
-                {
-                    this.pictureBox1.Size = new Size((int)(height * border * ratio), (int)(height * border));
-                    this.pictureBox1.Location = new Point((width / 2) - (this.pictureBox1.Width / 2), (height / 2) - (this.pictureBox1.Height / 2));
-                    this.Size = new Size(width, height);
-                    this.ClientSize = new Size(width, height);
-                    this.Location = new Point(10, Screen.PrimaryScreen.Bounds.Height / 2 - height / 2);
-                }
-                valchanged(5, GetAsyncKeyState(Keys.NumPad1));
-                if (wd[5] == 1)
-                {
-                    this.pictureBox1.Size = new Size((int)(height * border * ratio), (int)(height * border));
-                    this.pictureBox1.Location = new Point((width / 2) - (this.pictureBox1.Width / 2), (height / 2) - (this.pictureBox1.Height / 2));
-                    this.Size = new Size(width, height);
-                    this.ClientSize = new Size(width, height);
-                    this.Location = new Point(10, Screen.PrimaryScreen.Bounds.Height - height - 10);
-                }
-                valchanged(6, GetAsyncKeyState(Keys.NumPad2));
-                if (wd[6] == 1)
-                {
-                    this.pictureBox1.Size = new Size((int)(height * border * ratio), (int)(height * border));
-                    this.pictureBox1.Location = new Point((width / 2) - (this.pictureBox1.Width / 2), (height / 2) - (this.pictureBox1.Height / 2));
-                    this.Size = new Size(width, height);
-                    this.ClientSize = new Size(width, height);
-                    this.Location = new Point(Screen.PrimaryScreen.Bounds.Width / 2 - width / 2, Screen.PrimaryScreen.Bounds.Height - height - 10);
-                }
-                valchanged(7, GetAsyncKeyState(Keys.NumPad3));
-                if (wd[7] == 1)
-                {
-                    this.pictureBox1.Size = new Size((int)(height * border * ratio), (int)(height * border));
-                    this.pictureBox1.Location = new Point((width / 2) - (this.pictureBox1.Width / 2), (height / 2) - (this.pictureBox1.Height / 2));
-                    this.Size = new Size(width, height);
-                    this.ClientSize = new Size(width, height);
-                    this.Location = new Point(Screen.PrimaryScreen.Bounds.Width - width - 10, Screen.PrimaryScreen.Bounds.Height - height - 10);
-                }
-                valchanged(8, GetAsyncKeyState(Keys.NumPad6));
-                if (wd[8] == 1)
-                {
-                    this.pictureBox1.Size = new Size((int)(height * border * ratio), (int)(height * border));
-                    this.pictureBox1.Location = new Point((width / 2) - (this.pictureBox1.Width / 2), (height / 2) - (this.pictureBox1.Height / 2));
-                    this.Size = new Size(width, height);
-                    this.ClientSize = new Size(width, height);
-                    this.Location = new Point(Screen.PrimaryScreen.Bounds.Width - width - 10, (int)(double)Screen.PrimaryScreen.Bounds.Height / 2 - height / 2);
-                }
-                valchanged(9, GetAsyncKeyState(Keys.NumPad5));
-                if (wd[9] == 1)
-                {
-                    this.pictureBox1.Size = new Size((int)(Screen.PrimaryScreen.Bounds.Height * border * ratio), (int)(Screen.PrimaryScreen.Bounds.Height * border));
-                    this.pictureBox1.Location = new Point((int)(Screen.PrimaryScreen.Bounds.Height * ratio / 2) - this.pictureBox1.Width / 2, Screen.PrimaryScreen.Bounds.Height / 2 - this.pictureBox1.Height / 2);
-                    this.Size = new Size((int)(Screen.PrimaryScreen.Bounds.Height * ratio), Screen.PrimaryScreen.Bounds.Height);
-                    this.ClientSize = new Size((int)(Screen.PrimaryScreen.Bounds.Height * ratio), Screen.PrimaryScreen.Bounds.Height);
-                    this.Location = new Point(Screen.PrimaryScreen.Bounds.Width / 2 - (int)(Screen.PrimaryScreen.Bounds.Height * ratio / 2), 0);
-                }
-                valchanged(10, GetAsyncKeyState(Keys.Multiply));
-                if (wd[10] == 1)
-                {
-                    this.Size = new Size(0, 0);
-                    this.ClientSize = new Size(0, 0);
-                    this.Location = new Point(0, 0);
-                }
-                valchanged(11, GetAsyncKeyState(Keys.Subtract));
-                if (wd[11] == 1)
-                {
-                    if (!getstate)
-                    {
-                        getstate = true;
-                        this.Opacity = 1;
-                    }
-                    else
-                    {
-                        getstate = false;
-                        this.Opacity = 0.5D;
-                    }
-                }
-            }
-            catch { }
+            DisplayCapture(img);
         }
-        private void timer1_Tick(object sender, EventArgs e)
+        private static void InitDisplayCapture(IntPtr handle)
         {
-            try
+            renderProp = new RenderTargetProperties()
             {
-                Bitmap bmp = new Bitmap(img);
-                SetWebcamInputs(bmp);
-            }
-            catch { }
+                DpiX = 0,
+                DpiY = 0,
+                MinLevel = SharpDX.Direct2D1.FeatureLevel.Level_DEFAULT,
+                PixelFormat = new SharpDX.Direct2D1.PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
+                Type = RenderTargetType.Hardware,
+                Usage = RenderTargetUsage.None
+            };
+            winProp = new HwndRenderTargetProperties()
+            {
+                Hwnd = handle,
+                PixelSize = new Size2(imgwidth, imgheight),
+                PresentOptions = PresentOptions.Immediately
+            };
+            target = new WindowRenderTarget(fact, renderProp, winProp);
+        }
+        private static void DisplayCapture(Bitmap bmp)
+        {
+            System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            SharpDX.DataStream stream = new SharpDX.DataStream(bmpData.Scan0, bmpData.Stride * bmpData.Height, true, false);
+            SharpDX.Direct2D1.PixelFormat pFormat = new SharpDX.Direct2D1.PixelFormat(SharpDX.DXGI.Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied);
+            SharpDX.Direct2D1.BitmapProperties bmpProps = new SharpDX.Direct2D1.BitmapProperties(pFormat);
+            SharpDX.Direct2D1.Bitmap result = new SharpDX.Direct2D1.Bitmap(target, new SharpDX.Size2(imgwidth, imgheight), stream, bmpData.Stride, bmpProps);
+            bmp.UnlockBits(bmpData);
+            stream.Dispose();
+            bmp.Dispose();
+            target.BeginDraw();
+            target.Clear(new SharpDX.Mathematics.Interop.RawColor4(0, 0, 0, 1f));
+            target.DrawBitmap(result, 1.0f, BitmapInterpolationMode.NearestNeighbor);
+            target.EndDraw();
         }
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
