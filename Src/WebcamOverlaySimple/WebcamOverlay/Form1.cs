@@ -4,19 +4,13 @@ using System.Windows.Forms;
 using AForge.Video;
 using AForge.Video.DirectShow;
 using System.Runtime.InteropServices;
-using System.Drawing.Imaging;
 using SharpDX;
 using SharpDX.Direct2D1;
-using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using AlphaMode = SharpDX.Direct2D1.AlphaMode;
-using Device = SharpDX.Direct3D11.Device;
-using MapFlags = SharpDX.Direct3D11.MapFlags;
-using Rectangle = System.Drawing.Rectangle;
 using Bitmap = System.Drawing.Bitmap;
-using System.Drawing.Drawing2D;
 using Point = System.Drawing.Point;
-using static System.Net.Mime.MediaTypeNames;
+using System.Drawing.Drawing2D;
 
 namespace WebcamOverlay
 {
@@ -46,6 +40,8 @@ namespace WebcamOverlay
         private static SharpDX.Direct2D1.Factory1 fact = new SharpDX.Direct2D1.Factory1();
         private static RenderTargetProperties renderProp;
         private static HwndRenderTargetProperties winProp;
+        private Region rg;
+        private GraphicsPath gp;
 
         [Obsolete]
         private void Form1_Shown(object sender, EventArgs e)
@@ -60,17 +56,17 @@ namespace WebcamOverlay
                 CaptureDevice = new FilterInfoCollection(FilterCategory.VideoInputDevice);
                 FinalFrame = new VideoCaptureDevice(CaptureDevice[0].MonikerString);
                 videoCapabilities = FinalFrame.VideoCapabilities;
-                FinalFrame.VideoResolution = videoCapabilities[videoCapabilities.Length - 1];
-                FinalFrame.DesiredFrameRate = 15;
+                FinalFrame.VideoResolution = videoCapabilities[1];
+                FinalFrame.DesiredFrameRate = 10;
                 ratio = Convert.ToDouble(FinalFrame.VideoResolution.FrameSize.Width) / Convert.ToDouble(FinalFrame.VideoResolution.FrameSize.Height);
+                border = 10f;
                 height = 300;
                 width = (int)(height * ratio);
                 this.Size = new Size(width, height);
                 this.ClientSize = new Size(width, height);
-                this.Location = new System.Drawing.Point(Screen.PrimaryScreen.Bounds.Width - width - 10, 10);
-                border = 1.00f;
-                FinalFrame.DesiredFrameSize = new Size((int)(height * border * ratio), (int)(height * border));
-                FinalFrame.SetCameraProperty(CameraControlProperty.Zoom, 600, CameraControlFlags.Manual);
+                this.Location = new Point(Screen.PrimaryScreen.Bounds.Width - width - (int)border, (int)border);
+                FinalFrame.DesiredFrameSize = new Size((int)(height * ratio), height);
+                FinalFrame.SetCameraProperty(CameraControlProperty.Zoom, 0, CameraControlFlags.Manual);
                 FinalFrame.SetCameraProperty(CameraControlProperty.Focus, 0, CameraControlFlags.Manual);
                 FinalFrame.SetCameraProperty(CameraControlProperty.Exposure, 0, CameraControlFlags.Manual);
                 FinalFrame.SetCameraProperty(CameraControlProperty.Iris, 0, CameraControlFlags.Manual);
@@ -82,7 +78,12 @@ namespace WebcamOverlay
                 System.Threading.Thread.Sleep(1000);
                 imgheight = img.Height;
                 imgwidth = img.Width;
-                InitDisplayCapture(this.Handle);
+                pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
+                gp = new GraphicsPath();
+                gp.AddEllipse(pictureBox1.DisplayRectangle);
+                rg = new Region(gp);
+                pictureBox1.Region = rg;
+                InitDisplayCapture(this.pictureBox1.Handle);
             }
             catch
             {

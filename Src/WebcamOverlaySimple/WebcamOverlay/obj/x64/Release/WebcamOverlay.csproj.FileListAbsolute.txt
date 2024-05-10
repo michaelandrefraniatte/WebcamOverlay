@@ -53,3 +53,9 @@ C:\Users\micha\Documents\GitHub\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOver
 C:\Users\micha\Documents\GitHub\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\obj\x64\Release\WebcamOverlay.exe
 C:\Users\micha\Documents\GitHub\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\obj\x64\Release\WebcamOverlay.pdb
 C:\Users\micha\Documents\github\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\obj\x64\Release\WebcamOv.6A152200.Up2Date
+C:\Users\micha\Documents\github\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\bin\x64\Release\AForge.dll
+C:\Users\micha\Documents\github\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\bin\x64\Release\AForge.Video.DirectShow.dll
+C:\Users\micha\Documents\github\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\bin\x64\Release\AForge.Video.dll
+C:\Users\micha\Documents\github\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\bin\x64\Release\AForge.xml
+C:\Users\micha\Documents\github\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\bin\x64\Release\AForge.Video.xml
+C:\Users\micha\Documents\github\WebcamOverlay\Src\WebcamOverlaySimple\WebcamOverlay\bin\x64\Release\AForge.Video.DirectShow.xml
