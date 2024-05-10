@@ -60,7 +60,7 @@ namespace WebcamOverlay
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Form1";
-            this.Opacity = 0.5D;
+            this.Opacity = 0.75D;
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "WebcamOverlay";
