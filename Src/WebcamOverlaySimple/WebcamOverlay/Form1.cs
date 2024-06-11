@@ -4,10 +4,6 @@ using System.Windows.Forms;
 using AForge.Video;
 using AForge.Video.DirectShow;
 using System.Runtime.InteropServices;
-using SharpDX;
-using SharpDX.Direct2D1;
-using SharpDX.DXGI;
-using AlphaMode = SharpDX.Direct2D1.AlphaMode;
 using Bitmap = System.Drawing.Bitmap;
 using Point = System.Drawing.Point;
 using System.Drawing.Drawing2D;
@@ -43,14 +39,10 @@ namespace WebcamOverlay
         private VideoCaptureDevice FinalFrame;
         private VideoCapabilities[] videoCapabilities;
         private static int height = 300, width, imgheight, imgwidth;
-        private static bool getstate = false;
-        private static double ratio, border;
-        private static WindowRenderTarget target;
-        private static SharpDX.Direct2D1.Factory1 fact = new SharpDX.Direct2D1.Factory1();
-        private static RenderTargetProperties renderProp;
-        private static HwndRenderTargetProperties winProp;
+        private static double initratio, ratio, border;
         private Region rg;
         private GraphicsPath gp;
+        private static bool getstateminus, getstateplus;
         private const int GWL_STYLE = -16;
         private const uint WS_BORDER = 0x00800000;
         private const uint WS_CAPTION = 0x00C00000;
@@ -61,8 +53,8 @@ namespace WebcamOverlay
         private const uint WS_POPUP = 0x80000000;
         private const uint WS_TABSTOP = 0x00010000;
         private const uint WS_VISIBLE = 0x10000000;
-        private static int[] wd = { 2, 2 };
-        private static int[] wu = { 2, 2 };
+        private static int[] wd = { 2, 2, 2, 2 };
+        private static int[] wu = { 2, 2, 2, 2 };
         public static void valchanged(int n, bool val)
         {
             if (val)
@@ -89,22 +81,26 @@ namespace WebcamOverlay
             {
                 TimeBeginPeriod(1);
                 NtSetTimerResolution(1, true, ref CurrentResolution);
-                Task.Run(() => StartWindowTitleRemover());
+                Task.Run(() => Start());
                 AppDomain.CurrentDomain.UnhandledException += new System.UnhandledExceptionEventHandler(AppDomain_UnhandledException);
                 System.Windows.Forms.Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
                 this.TopMost = true;
                 CaptureDevice = new FilterInfoCollection(FilterCategory.VideoInputDevice);
                 FinalFrame = new VideoCaptureDevice(CaptureDevice[0].MonikerString);
+                FinalFrame.DesiredFrameRate = 10;
+                FinalFrame.DesiredFrameSize = new Size(300, 300);
                 videoCapabilities = FinalFrame.VideoCapabilities;
                 FinalFrame.VideoResolution = videoCapabilities[1];
-                FinalFrame.DesiredFrameRate = 10;
-                ratio = Convert.ToDouble(FinalFrame.VideoResolution.FrameSize.Width) / Convert.ToDouble(FinalFrame.VideoResolution.FrameSize.Height);
+                initratio = Convert.ToDouble(FinalFrame.VideoResolution.FrameSize.Width) / Convert.ToDouble(FinalFrame.VideoResolution.FrameSize.Height);
+                ratio = 1;
                 border = 10f;
                 height = 300;
                 width = (int)(height * ratio);
                 this.Size = new Size(width, height);
                 this.ClientSize = new Size(width, height);
                 this.Location = new Point(Screen.PrimaryScreen.Bounds.Width - width - (int)border, (int)border);
+                this.pictureBox1.Size = new Size(width, height);
+                this.pictureBox1.Location = new Point(0, 0);
                 FinalFrame.DesiredFrameSize = new Size((int)(height * ratio), height);
                 FinalFrame.SetCameraProperty(CameraControlProperty.Zoom, 0, CameraControlFlags.Manual);
                 FinalFrame.SetCameraProperty(CameraControlProperty.Focus, 0, CameraControlFlags.Manual);
@@ -115,22 +111,22 @@ namespace WebcamOverlay
                 FinalFrame.SetCameraProperty(CameraControlProperty.Roll, 0, CameraControlFlags.Manual);
                 FinalFrame.NewFrame += FinalFrame_NewFrame;
                 FinalFrame.Start();
-                System.Threading.Thread.Sleep(1000);
-                imgheight = img.Height;
-                imgwidth = img.Width;
-                pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
-                gp = new GraphicsPath();
-                gp.AddEllipse(pictureBox1.DisplayRectangle);
-                rg = new Region(gp);
-                pictureBox1.Region = rg;
-                InitDisplayCapture(this.pictureBox1.Handle);
+                pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+                System.Drawing.Rectangle r = new System.Drawing.Rectangle(0, 0, pictureBox1.Width, pictureBox1.Height);
+                GraphicsPath gp = new GraphicsPath();
+                int d = 50;
+                gp.AddArc(r.X, r.Y, d, d, 180, 90);
+                gp.AddArc(r.X + r.Width - d, r.Y, d, d, 270, 90);
+                gp.AddArc(r.X + r.Width - d, r.Y + r.Height - d, d, d, 0, 90);
+                gp.AddArc(r.X, r.Y + r.Height - d, d, d, 90, 90);
+                this.Region = new Region(gp);
             }
             catch
             {
                 this.Close();
             }
         }
-        private void StartWindowTitleRemover()
+        private void Start()
         {
             while (true)
             {
@@ -150,6 +146,38 @@ namespace WebcamOverlay
                     IntPtr window = GetForegroundWindow();
                     SetWindowLong(window, GWL_STYLE, WS_CAPTION | WS_POPUP | WS_BORDER | WS_SYSMENU | WS_TABSTOP | WS_VISIBLE | WS_OVERLAPPED | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
                     DrawMenuBar(window);
+                }
+                valchanged(2, GetAsyncKeyState(Keys.Subtract));
+                if (wu[2] == 1 & !getstateminus)
+                {
+                    getstateminus = true;
+                    this.Opacity = 1;
+                }
+                else if (wu[2] == 1 & getstateminus)
+                {
+                    getstateminus = false;
+                    this.Opacity = 0.75D;
+                }
+                valchanged(3, GetAsyncKeyState(Keys.Add));
+                if (wu[3] == 1 & !getstateplus)
+                {
+                    getstateplus = true; 
+                    gp = new GraphicsPath();
+                    gp.AddEllipse(pictureBox1.DisplayRectangle);
+                    rg = new Region(gp);
+                    pictureBox1.Region = rg;
+                }
+                else if (wu[3] == 1 & getstateplus)
+                {
+                    getstateplus = false;
+                    System.Drawing.Rectangle r = new System.Drawing.Rectangle(0, 0, pictureBox1.Width, pictureBox1.Height);
+                    GraphicsPath gp = new GraphicsPath();
+                    int d = 50;
+                    gp.AddArc(r.X, r.Y, d, d, 180, 90);
+                    gp.AddArc(r.X + r.Width - d, r.Y, d, d, 270, 90);
+                    gp.AddArc(r.X + r.Width - d, r.Y + r.Height - d, d, d, 0, 90);
+                    gp.AddArc(r.X, r.Y + r.Height - d, d, d, 90, 90);
+                    pictureBox1.Region = new Region(gp);
                 }
                 System.Threading.Thread.Sleep(100);
             }
@@ -185,44 +213,25 @@ namespace WebcamOverlay
         {
             this.FormBorderStyle = FormBorderStyle.None;
         }
-        void FinalFrame_NewFrame(object sender, NewFrameEventArgs eventArgs)
+        private void FinalFrame_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
-            img = (Bitmap)eventArgs.Frame.Clone();
-            DisplayCapture(img);
-        }
-        private static void InitDisplayCapture(IntPtr handle)
-        {
-            renderProp = new RenderTargetProperties()
+            try
             {
-                DpiX = 0,
-                DpiY = 0,
-                MinLevel = SharpDX.Direct2D1.FeatureLevel.Level_DEFAULT,
-                PixelFormat = new SharpDX.Direct2D1.PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
-                Type = RenderTargetType.Hardware,
-                Usage = RenderTargetUsage.None
-            };
-            winProp = new HwndRenderTargetProperties()
-            {
-                Hwnd = handle,
-                PixelSize = new Size2(imgwidth, imgheight),
-                PresentOptions = PresentOptions.Immediately
-            };
-            target = new WindowRenderTarget(fact, renderProp, winProp);
+                Bitmap capture = eventArgs.Frame.Clone() as Bitmap;
+                this.pictureBox1.Image = cropImage(capture);
+                capture.Dispose();
+            }
+            catch { }
         }
-        private static void DisplayCapture(Bitmap bmp)
+        private Bitmap cropImage(Bitmap bmp)
         {
-            System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            SharpDX.DataStream stream = new SharpDX.DataStream(bmpData.Scan0, bmpData.Stride * bmpData.Height, true, false);
-            SharpDX.Direct2D1.PixelFormat pFormat = new SharpDX.Direct2D1.PixelFormat(SharpDX.DXGI.Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied);
-            SharpDX.Direct2D1.BitmapProperties bmpProps = new SharpDX.Direct2D1.BitmapProperties(pFormat);
-            SharpDX.Direct2D1.Bitmap result = new SharpDX.Direct2D1.Bitmap(target, new SharpDX.Size2(imgwidth, imgheight), stream, bmpData.Stride, bmpProps);
-            bmp.UnlockBits(bmpData);
-            stream.Dispose();
-            bmp.Dispose();
-            target.BeginDraw();
-            target.Clear(new SharpDX.Mathematics.Interop.RawColor4(0, 0, 0, 1f));
-            target.DrawBitmap(result, 1.0f, BitmapInterpolationMode.NearestNeighbor);
-            target.EndDraw();
+            int oldwidth = (int)(initratio * bmp.Height);
+            int oldheight = bmp.Height;
+            int newWidth = oldheight;
+            int newHeight = oldheight;
+            Rectangle CropArea = new Rectangle((oldwidth - oldheight) / 2, 0, newWidth, newHeight);
+            Bitmap bmpCrop = bmp.Clone(CropArea, bmp.PixelFormat);
+            return bmpCrop;
         }
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
